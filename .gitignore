@@ -14,3 +14,5 @@ testdata/lcet10.txt
 testdata/paper-100k.pdf
 testdata/plrabn12.txt
 testdata/urls.10K
+
+.idea

@@ -42,6 +42,27 @@ func Encode(dst, src []byte) []byte {
 	return dst[:d]
 }
 
+func EncodeLiteral(dst, src []byte) []byte {
+	if n := MaxEncodedLen(len(src)); n < 0 {
+		panic(ErrTooLarge)
+	} else if len(dst) < n {
+		dst = make([]byte, n)
+	}
+
+	// The block starts with the varint-encoded length of the decompressed bytes.
+	d := binary.PutUvarint(dst, uint64(len(src)))
+
+	for len(src) > 0 {
+		p := src
+		src = nil
+		if len(p) > maxBlockSize {
+			p, src = p[:maxBlockSize], p[maxBlockSize:]
+		}
+		d += emitLiteral(dst[d:], p)
+	}
+	return dst[:d]
+}
+
 // inputMargin is the minimum number of extra input bytes to keep, inside
 // encodeBlock's inner loop. On some architectures, this margin lets us
 // implement a fast path for emitLiteral, where the copy of short (<= 16 byte)
